@@ -26,10 +26,4 @@ public class Child implements Serializable {
     @JoinColumn(name = "ID_Parent")
     private Parent parent;
 
-    private Integer parentId;
-
-    @Column(name = "ParentID", insertable=false, updatable=false)
-    public Integer getParentId() {
-        return parentId;
-    }
 }
