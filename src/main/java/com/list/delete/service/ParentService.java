@@ -38,25 +38,4 @@ public class ParentService {
         return parentRepository.save(parent);
     }
 
-    public Parent retrieveParent(Parent parent) throws JsonProcessingException{
-        Parent oldParent = null;
-
-        if (parent.getIdParent() != null){
-            oldParent = parentRepository.findById(parent.getIdParent()).orElse(null);
-        }
-        if (oldParent != null) {
-            return mergeParent(oldParent, parent);
-        } else {
-            return parent;
-        }
-    }
-
-    public Parent mergeParent(Parent oldParent, Parent newParent)
-    throws JsonMappingException, JsonProcessingException {
-    ObjectMapper objectMapper = new ObjectMapper();
-ObjectReader updater = objectMapper.readerForUpdating(oldParent);
-String newRequestString = objectMapper.writeValueAsString(newParent);
-return updater.readValue(newRequestString);
-}
-
 }
