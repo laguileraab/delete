@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.*;
 
 @Getter
@@ -19,8 +21,15 @@ public class Child implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idChild;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "ID_Parent")
     private Parent parent;
 
+    private Integer parentId;
+
+    @Column(name = "ParentID", insertable=false, updatable=false)
+    public Integer getParentId() {
+        return parentId;
+    }
 }

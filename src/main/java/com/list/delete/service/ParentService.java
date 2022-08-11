@@ -35,7 +35,7 @@ public class ParentService {
                         () -> new NoSuchElementException("El padre con id: " + id + " no se encuentra")));
     }
     public Parent saveParent(Parent parent) throws JsonProcessingException {
-        return parentRepository.save(retrieveParent(parent));
+        return parentRepository.save(parent);
     }
 
     public Parent retrieveParent(Parent parent) throws JsonProcessingException{
@@ -45,9 +45,6 @@ public class ParentService {
             oldParent = parentRepository.findById(parent.getIdParent()).orElse(null);
         }
         if (oldParent != null) {
-            parentRepository.flush();
-            parentRepository.delete(findParentById(parent.getIdParent()));
-            // parentRepository.flush();
             return mergeParent(oldParent, parent);
         } else {
             return parent;

@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.*;
 
 @Entity
@@ -23,7 +25,9 @@ public class Parent implements Serializable  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idParent;
 
+    @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "ID_Parent")
     private Set<Child> children = new HashSet<>();
+
 }

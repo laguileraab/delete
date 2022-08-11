@@ -31,7 +31,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<MessageResponseError> noSuchElementExceptionsHandler(Exception ex, WebRequest request) {
         MessageResponseError errorDetails = new MessageResponseError
-                (HttpStatus.NOT_FOUND, ex.getMessage(), "Error_in_" + request.getDescription(false),ex.getStackTrace().toString());
+                (HttpStatus.NOT_FOUND, ex.getMessage(), "Error_in_" + request.getDescription(false),ex.getMessage());
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
@@ -48,7 +48,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         MessageResponseError errorDetails = new MessageResponseError
                 (HttpStatus.BAD_REQUEST,
                         "Los datos de entrada no son válidos",
-                        "Error_in_" + request.getDescription(false),ex.getStackTrace().toString());
+                        "Error_in_" + request.getDescription(false),ex.getMessage());
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
@@ -63,7 +63,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
            MessageResponseError errorDetails = new MessageResponseError
                 (HttpStatus.BAD_REQUEST,
                 errorMessage,
-                        "Error_in_" + request.getDescription(false),ex.getStackTrace().toString());
+                        "Error_in_" + request.getDescription(false),ex.getMessage());
            return new ResponseEntity<>(errorDetails, status);
     }
 
@@ -85,7 +85,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<MessageResponseError> malformedURLExceptionsHandler(Exception ex, WebRequest request) {
         MessageResponseError errorDetails = new MessageResponseError
                 (HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(),
-                        "Error_in_" + request.getDescription(false),ex.getStackTrace().toString());
+                        "Error_in_" + request.getDescription(false),ex.getMessage());
         // ErrorHandler.log.error(HttpStatus.BAD_REQUEST + " " + ex.getMessage());
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -95,10 +95,10 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         MessageResponseError errorDetails = new MessageResponseError
                 (HttpStatus.INTERNAL_SERVER_ERROR,
                         "Ha ocurrido un error",
-                        "Error_in_" + request.getDescription(false),ex.getStackTrace().toString());
+                        "Error_in_" + request.getDescription(false),ex.getMessage());
         // ErrorHandler.log.error(HttpStatus.INTERNAL_SERVER_ERROR + " " + ex.getMessage()
         //         + "Stacktrace" + ExceptionUtils.getStackTrace(ex));
-        System.out.println(ex.getStackTrace());
+        ex.printStackTrace();
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
