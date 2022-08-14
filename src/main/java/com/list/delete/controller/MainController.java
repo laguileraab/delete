@@ -1,5 +1,8 @@
 package com.list.delete.controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+
+import java.util.LinkedHashMap;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,5 +43,17 @@ public class MainController {
                 .body(new GenericResponseDTO(
                         "Padre guardado exitosamente",
                         parentDto, 201));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<GenericResponseDTO> updateParent(@PathVariable Long id,
+            @RequestBody LinkedHashMap<Object,Object> parent) throws JsonProcessingException {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new GenericResponseDTO(
+                        "Padre actualizado exitosamente",
+                        new ParentConverter()
+                                .parentToParentDto(parentService.patchParent(id, parent)),
+                        200));
     }
 }

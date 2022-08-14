@@ -14,6 +14,8 @@ public class ParentConverter {
         if (parent != null)
             return ParentDto.builder()
                     .idParent(parent.getIdParent())
+                    .name(parent.getName())
+                    .uncle(new UncleConverter().uncleToUncleDto(parent.getUncle()))
                     .children(
                             new ChildConverter().childSetToChildSetDto(
                                     parent.getChildren()))
@@ -25,6 +27,8 @@ public class ParentConverter {
         if (parentDto != null)
             return Parent.builder()
                     .idParent(parentDto.getIdParent())
+                    .name(parentDto.getName())
+                    .uncle(new UncleConverter().uncleDtoToUncle(parentDto.getUncle()))
                     .children(
                             new ChildConverter().childDtoSetToChildsSet(
                                     parentDto.getChildren()))
@@ -32,11 +36,11 @@ public class ParentConverter {
         return null;
     }
 
-    public List<ParentDto> requestsToRequestsDto(List<Parent> parents) {
+    public List<ParentDto> parentsToParentsDto(List<Parent> parents) {
         List<ParentDto> parentsDto = new ArrayList<>();
 
         parents.stream()
-                .forEach((r) -> parentsDto.add(parentToParentDto(r)));
+                .forEach(e -> parentsDto.add(parentToParentDto(e)));
 
         return parentsDto;
     }

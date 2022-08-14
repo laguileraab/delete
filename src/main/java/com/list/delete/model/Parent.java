@@ -25,8 +25,14 @@ public class Parent implements Serializable  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idParent;
 
+    private String name;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ID_Uncle")
+    private Uncle uncle;
+
     @JsonManagedReference
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "ID_Parent")
     private Set<Child> children = new HashSet<>();
 

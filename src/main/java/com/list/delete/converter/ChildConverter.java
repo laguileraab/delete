@@ -36,7 +36,7 @@ public class ChildConverter {
         List<ChildDto> childsDto = new ArrayList<>();
         if(childs != null)
             childs
-                .forEach((e) -> childsDto.add(childToChildDto(e)));
+                .forEach(e -> childsDto.add(childToChildDto(e)));
         return childsDto;
     }
 
@@ -44,14 +44,14 @@ public class ChildConverter {
         Set<ChildDto> childsDto = new HashSet<>();
         if(childs != null)
             childs
-                .forEach((e) -> childsDto.add(childToChildDto(e)));
+                .forEach(e -> childsDto.add(childToChildDto(e)));
         return childsDto;
     }
 
     public Set<Child> childDtoSetToChildsSet(Set<ChildDto> childsDto) {
         Set<Child> childs = new HashSet<>();
         if(childsDto != null)
-            childsDto.forEach((e) -> childs.add(childDtoToChild(e)));
+            childsDto.forEach(e -> childs.add(childDtoToChild(e)));
         return childs;
     }
 }
