@@ -19,4 +19,6 @@ public class ChildDto implements Serializable {
 
     private Long idChild;
 
+    private String name;
+
 }

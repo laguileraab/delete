@@ -21,6 +21,8 @@ public class Child implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idChild;
 
+    private String name;
+
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "ID_Parent")

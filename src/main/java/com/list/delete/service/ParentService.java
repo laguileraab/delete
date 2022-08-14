@@ -7,15 +7,21 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.NoSuchElementException;
 
+import javax.json.JsonMergePatch;
+import javax.json.JsonValue;
+
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.list.delete.converter.ParentConverter;
 import com.list.delete.dto.ParentDto;
 import com.list.delete.model.Parent;
@@ -44,14 +50,17 @@ public class ParentService {
         return parentRepository.save(parent);
     }
 
-    public Parent patchParentReflection(Long id, LinkedHashMap<Object, Object> values) throws JsonProcessingException {
+    //////////////////////////////
+    // Reflection Patch
+    //////////////////////////////
+
+    public Parent patchParentReflection(Long id, LinkedHashMap<Object, Object> values) {
         Parent parent = findParentById(id);
         recursivePatchRequest(parent.getClass().getName(), parent, values);
         return parentRepository.save(parent);
     }
 
-    public <T> void recursivePatchRequest(String clazz, T object, LinkedHashMap<Object, Object> fields)
-            throws JsonProcessingException {
+    public <T> void recursivePatchRequest(String clazz, T object, LinkedHashMap<Object, Object> fields) {
         fields.forEach((key, value) -> {
             if (value != null) {
                 Field field = null;
@@ -85,21 +94,25 @@ public class ParentService {
                                 // objeto que recibe los campos, pero este se desconoce
                                 recursivePatchRequest(childClass.getName(), objectMapper.convertValue(v, childClass),
                                         (LinkedHashMap<Object, Object>) v);
-                            } catch (JsonProcessingException | IllegalArgumentException e) {
+                            } catch (IllegalArgumentException e) {
                                 e.printStackTrace();
                             }
                         });
                     }
                     ReflectionUtils.setField(field, object,
                             objectMapper.convertValue(fields.get((String) key), theClass));
-                } catch (IllegalArgumentException | JsonProcessingException | ClassNotFoundException
+                } catch (IllegalArgumentException | ClassNotFoundException
                         | SecurityException | NoSuchFieldException e) {
                     e.printStackTrace();
                 }
             }
         });
     }
+    //////////////////////////////
 
+    //////////////////////////////
+    // Mapper Patch
+    //////////////////////////////
     public Parent patchParentMapper(Long id, Parent newParent) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         ParentDto oldRequest = findParentDtoById(id);
@@ -109,5 +122,27 @@ public class ParentService {
         return parentRepository.save(new ParentConverter()
                 .parentDtoToParent(merged));
     }
+    //////////////////////////////
+
+    //////////////////////////////
+    // Merge JsonPatch
+    //////////////////////////////
+
+    public Parent jsonMergePatchRequest(Long id, JsonMergePatch mergePatch) {
+        Parent parent = findParentById(id);
+        return parentRepository.save(mergePatch(mergePatch, parent, Parent.class));
+    }
+
+    public <T> T mergePatch(JsonMergePatch mergePatch, T targetBean, Class<T> beanClass) {
+        ObjectMapper objectMapper = new ObjectMapper()
+        .setDefaultPropertyInclusion(Include.NON_NULL)
+        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .findAndRegisterModules();
+        JsonValue target = objectMapper.convertValue(targetBean, JsonValue.class);
+        JsonValue patched = mergePatch.apply(target);
+        return objectMapper.convertValue(patched, beanClass);
+    }
+    //////////////////////////////
 
 }
