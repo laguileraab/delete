@@ -15,6 +15,7 @@ import org.springframework.util.ReflectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.list.delete.converter.ParentConverter;
 import com.list.delete.dto.ParentDto;
 import com.list.delete.model.Parent;
@@ -24,7 +25,7 @@ import com.list.delete.repository.ParentRepository;
 @Service
 @RequiredArgsConstructor
 public class ParentService {
-    
+
     private final ParentRepository parentRepository;
 
     public Parent findParentById(Long id) {
@@ -38,11 +39,12 @@ public class ParentService {
                 .orElseThrow(
                         () -> new NoSuchElementException("El padre con id: " + id + " no se encuentra")));
     }
+
     public Parent saveParent(Parent parent) throws JsonProcessingException {
         return parentRepository.save(parent);
     }
 
-    public Parent patchParent(Long id, LinkedHashMap<Object,Object> values) throws JsonProcessingException {
+    public Parent patchParentReflection(Long id, LinkedHashMap<Object, Object> values) throws JsonProcessingException {
         Parent parent = findParentById(id);
         recursivePatchRequest(parent.getClass().getName(), parent, values);
         return parentRepository.save(parent);
@@ -73,6 +75,14 @@ public class ParentService {
                                 childClass = (Class<?>) childTtype;
                             }
                             try {
+                                // Se envia cada uno de los objetos dentro del arreglo
+                                // sin embargo dado que la lista de entrada no tiene que
+                                // coincidir con la de salida no es posible recorrer la lista,
+                                // aunque fuera un doble ciclo no se conoce cual objeto
+                                // corresponde a cual, por lo que se descarta esta via para los arreglos.
+                                // Notar que se envia la clase del objeto y el mismo valor repetido
+                                // en los otros dos campos, en donde el primero corresponderia al
+                                // objeto que recibe los campos, pero este se desconoce
                                 recursivePatchRequest(childClass.getName(), objectMapper.convertValue(v, childClass),
                                         (LinkedHashMap<Object, Object>) v);
                             } catch (JsonProcessingException | IllegalArgumentException e) {
@@ -88,6 +98,16 @@ public class ParentService {
                 }
             }
         });
+    }
+
+    public Parent patchParentMapper(Long id, Parent newParent) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ParentDto oldRequest = findParentDtoById(id);
+        ObjectReader updater = objectMapper.readerForUpdating(oldRequest);
+        String newRequestString = objectMapper.writeValueAsString(newParent);
+        ParentDto merged = updater.readValue(newRequestString);
+        return parentRepository.save(new ParentConverter()
+                .parentDtoToParent(merged));
     }
 
 }
